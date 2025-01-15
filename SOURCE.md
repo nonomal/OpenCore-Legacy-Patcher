@@ -1,21 +1,20 @@
 # Build and run from source
 
-OpenCore Legacy Patcher at its core is a python-based TUI/CLI based application. This means that to run the project from source, you simply need to invoke the OpenCore-Patcher.command file via Python.
+OpenCore Legacy Patcher at its core is a Python-based GUI/CLI-based application. In turn, to run the project from source, you simply need to invoke the OpenCore-Patcher-GUI.command file via Python.
 
-For developers wishing to validate mainline changes, you may use these nightly links:
+For developers wishing to validate mainline changes, you may use this link: [GUI (Graphical Based App)](https://nightly.link/dortania/OpenCore-Legacy-Patcher/workflows/build-app-wxpython/main/OpenCore-Patcher.pkg.zip)
 
-* [GUI (Graphical Based App)](https://nightly.link/dortania/OpenCore-Legacy-Patcher/workflows/build-app-wxpython/main/OpenCore-Patcher.app%20%28GUI%29.zip)
-* [TUI (Text Based App)](https://nightly.link/dortania/OpenCore-Legacy-Patcher/workflows/build-app/main/OpenCore-Patcher-TUI.app.zip)
+* **Warning**: Nightly builds (untagged builds built from the latest commit) are actively developed OpenCore Legacy Patcher builds. These builds have not been tested, are not guaranteed to work, and are not guaranteed to be safe. Do not use nightlies without a good reason to do so, and do not use them on your main machine. Additionally, these binaries should not be used without first consulting the [CHANGELOG](./CHANGELOG.md).
 
-**Warning**: These binaries should not be used without first consulting the [CHANGELOG](./CHANGELOG.md). Do not distribute these links in forums, instead direct to this file.
-
-* Users running new builds of the project without understanding what has changed are at higher of bricking their installation as they do not read any warnings provided in the CHANGELOG. We wish to minimize these situations as much as possible.
+  **Do not share _any_ links to these binaries** in forums; please link to **this document only**.
+  * Additionally, do not reupload these binaries or download binaries from other sites. Using binaries from untrusted sources is a security issue, as they may have been tampered with.
+* Users running new builds of the project without understanding what has changed and the implications of installing software under active development are at a higher risk of bricking their installation as they do not read any warnings provided in the CHANGELOG. We wish to minimize these situations as much as possible.
 
 ## Getting Started
 
-To start, ensure you have python 3.6 or newer installed. Additionally ensure that they were downloaded from the Official source, [python.org](https://www.python.org/downloads/macos/).
+To start, ensure you have Python 3.6 or newer installed. Additionally, ensure that it was downloaded from the official source, [python.org](https://www.python.org/downloads/macos/).
 
-* Python installations either preinstalled or provided with Xcode/Xcode Tools are unsupported due to reliablility issues
+* Python installations either preinstalled or provided with Xcode or the Xcode Command Line Tools are unsupported due to reliability issues.
 
 Once Python is installed, open Terminal and run the following:
 
@@ -30,47 +29,33 @@ cd ./OpenCore-Legacy-Patcher
 pip3 install -r requirements.txt
 ```
 
-If you have installation error, see following troubleshooting options:
+If you have any installation errors, see the following troubleshooting options:
 
-* Use Python 3.9
-  * Currently our build server uses py3.9 for generating binaries used in releases
+* Use Python 3.11
+  * Our build server currently uses Python 3.11 for generating binaries used in releases
 * Use .whl snapshots for installing additional dependencies
-  * [wxPython 4.1.1 wheel for py3.9](https://files.pythonhosted.org/packages/2c/a8/7027e8ca3ba20dc2ed2acd556e31941cb44097ab87d6f81d646a79de4eab/wxPython-4.1.1-cp39-cp39-macosx_10_10_x86_64.whl)
-  * [PyObjc 8.5 wheel for py3](https://files.pythonhosted.org/packages/69/3d/786f379dd669a078cf0c4a686e242c9b643071c23367bfbd3d9a7eb589ec/pyobjc-8.5-py3-none-any.whl)
-  * [Requests 2.27.1 for py2/py3](https://files.pythonhosted.org/packages/2d/61/08076519c80041bc0ffa1a8af0cbd3bf3e2b62af10435d269a9d0f40564d/requests-2.27.1-py2.py3-none-any.whl)
-  * [pyinstaller 5.3 for py3](https://files.pythonhosted.org/packages/65/70/625e86e5a45cb975a9c32a10a721394d10771275c69207308b80bc6a758e/pyinstaller-5.3-py3-none-macosx_10_13_universal2.whl)
-
 
 ## Running OpenCore Legacy Patcher
 
 To run the project from source, simply invoke via python3:
 
 ```sh
-# Launch TUI
-python3 OpenCore-Patcher.command
-```
-
-```sh
 # Launch GUI
 python3 OpenCore-Patcher-GUI.command
 ```
 
-Note that the OpenCore-Patcher.command file can be run as both a TUI and a CLI utility for other programs to call. If no core arguments are passed, the TUI is initialized. Otherwise the CLI will start:
+Note that the OpenCore-Patcher-GUI.command file can be run as both a GUI and a CLI utility for other programs to call. If no core arguments are passed, the GUI is initialized. Otherwise the CLI will start:
 
 ```sh
 # Launch CLI
-python3 OpenCore-Patcher.command --build --model iMac12,2 --verbose
+python3 OpenCore-Patcher-GUI.command --build --model iMac12,2 --verbose
 ```
 
-See `-h`/`--help` for more information on supported CLI arguments.
+Pass `-h` or `--help` for more information on supported CLI arguments.
 
 ## Generating prebuilt binaries
 
-The main goal of generating prebuilt binaries is to strip the requirement of a local python installation for users. For developers, there's very little benefit besides enabling dark mode support in the GUI. For development, simply use the OpenCore-Patcher.command file with a python3 installation.
-
-* Note that due to PyInstaller's linking mechanism, binaries generated on Catalina and newer are not compatible with High Sierra and older
-  * To ensure the largest compatibility, generate binaries on macOS Mojave. These binaries will be compatible with macOS 10.9 to macOS 12.
-  * Currently our build system is a [Macmini8,1 provided by MacStadium](https://www.macstadium.com/opensource) running macOS Mojave (10.14.6).
+The main goal of generating prebuilt binaries is to strip the requirement of a local Python installation for users. For developers, there's very little benefit besides enabling dark mode support in the GUI. For development, simply use the OpenCore-Patcher-GUI.command file with a Python 3 installation.
 
 ```sh
 # Install PyInstaller
@@ -78,10 +63,7 @@ pip3 install pyinstaller
 # Move into project directory
 cd ~/Developer/OpenCore-Legacy-Patcher/
 # Create the pyinstaller based Application
-# Optional Arguments
-#    '--build_tui':          Create TUI vairant
-#    '--reset_binaries':     Redownload and generate support files
-python3 Build-Binary.command
+python3 Build-Project.command
 # Open build folder
 open ./dist/
 ```

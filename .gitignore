@@ -17,7 +17,6 @@ __pycache__/
 *$py.class
 /docs/.vuepress/dist
 /docs/.vuepress/.config.js.swp
-/docs/yarn.lock
 /docs/yarn-error.log
 /docs/node_modules/
 /payloads/List.txt
@@ -30,5 +29,13 @@ __pycache__/
 /payloads/OpenCore-Legacy-Patcher
 /payloads/InstallAssistant.pkg.integrityDataV1
 /payloads.dmg
+/Universal-Binaries.dmg
 /payloads/OpenCore-Legacy-Patcher-*.plist
 /payloads/KDK.dmg
+*.log
+/Universal-Binaries.dmg
+/payloads/KDKInfo.plist
+/payloads/update.sh
+/payloads/OpenCore-Patcher.app
+/.x86_64_venv
+*afdesign~lock~

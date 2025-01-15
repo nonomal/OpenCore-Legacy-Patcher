@@ -1,5 +1,561 @@
 # OpenCore Legacy Patcher changelog
 
+## 2.3.0
+- Disable crash analytics
+  - Disabled server side for years, removing client side
+
+## 2.2.0
+- Resolved non-metal accessibility zoom on macOS Sonoma/Sequoia
+- Resolved non-metal photos app on macOS Sequoia
+- Resolved non-metal Screen Sharing on macOS Sequoia
+- Resolved non-metal inverted screenshots on macOS Sequoia
+- Improved non-metal beta menubar reliability
+- Disabled non-metal broken weather background animations on macOS Sequoia
+- Resolved non-metal safari hide distracting items crash on macOS Sequoia
+- Resolved non-metal full screen transition on macOS Sonoma/Sequoia
+- Resolved T1 Apple Pay on macOS Sequoia
+- Resolved T1 TouchID support on macOS Sequoia 15.2
+- Resolved iCloud sync problems
+- Resolved JavaScriptCore on pre-AVX Macs on macOS Sequoia 15.2/Safari 18.2
+- Increment binaries:
+  - PatcherSupportPkg 1.9.1 - release
+
+## 2.1.2
+- Add additional error handling for when building OpenCore errors out
+  - Prevents broken EFI from being installed to disk
+- Add additional error handling for broken settings file from OCLP 2.1.0
+  - If typing for settings is wrong, app will skip setting it, delete from settings file and use default
+  - Delete `/Users/Shared/.com.dortania.opencore-legacy-patcher.plist` and restart app to avoid this issue
+- Add additional warning about OCLP 2.1.0 bug where certain settings saved incorrectly
+  - Delete `/Users/Shared/.com.dortania.opencore-legacy-patcher.plist` and restart app if `TypeError: unsupported type: <class 'NoneType'>` error occurs
+
+## 2.1.1
+- Resolve boolean GUI settings saving incorrectly as Python's None type
+
+## 2.1.0
+- Disable FeatureUnlock by default
+  - Intended to maintain long term stability
+  - If features unlocked by FeatureUnlock desired, can be enabled in settings
+- Disable mediaanalysisd on Metal 3802-based GPUs
+  - Intended to maintain long term stability
+  - If Live Text support desired, can be enabled in settings
+- Support for retaining GUI settings when building on-model
+  - When switching to a different model, model-specific GUI settings will be reset
+  - Note resetting saved settings not implemented yet
+    - Delete `/Users/Shared/.com.dortania.opencore-legacy-patcher.plist` and restart app to reset settings
+- Resolve macOS 15.1 (24B2083) Apple Silicon installer appearing as download option
+- Resolve WhatsApp crashing on 15.1
+- Increment binaries:
+  - PatcherSupportPkg 1.8.4 - release
+
+## 2.0.2
+- Fix Nvidia Kepler patches not installing on Monterey
+- Fix `iMac7,1` and `iMac8,1` failing to apply root patches on macOS Sequoia
+- Avoid downgrading AppleGVA stack on AMD GCN and newer GPUs
+  - Resolves VTDecoderXPC crashes
+  - Thanks @ausdauersportler for the catch!
+- Resolve glitched widgets on 3802-based GPUs running macOS Sequoia 15.1
+- Resolve CoreImage crashes on 3802-based GPUs running macOS Sequoia
+- Resolve missing screen capture crop borders on non-Metal GPUs running macOS Sequoia
+- Resolve TeraScale 2 HDCP kernel panic
+- Resolve specific Wallpaper locking up on non-Metal GPUs running macOS Sequoia
+  - Removes unsupported Metal-based wallpaper (Macintosh Wallpaper)
+- Resolve firmware upload incompatibilities on pre-2012 Macs with 2012+ Airport cards
+  - Thanks @ausdauersportler for the catch!
+- Resolve `diskutil` failing to be located in the installer creation process
+  - Thanks @niklasravnsborg for the report!
+- Increment binaries:
+  - PatcherSupportPkg 1.8.3 - release
+
+## 2.0.1
+- Fix MacBookPro13,3 listing 'Available patches' after having installed all applicable patches
+- Fix Nvidia Tesla and Kepler patches not installing on Monterey (and older if applicable)
+- Fix Nvidia Web Drivers incorrectly listing 'OpenGL', 'compat' and 'nvda_drv(_vrl)' missing
+
+## 2.0.0
+- Set `AssociatedBundleIdentifiers` property in launch services as an array
+- Move to auto-generated pre/postinstall scripts for PKGs
+  - Streamlines PKG creation process, ensuring Install and AutoPKG scripts are always in sync
+- Add support for `gktool` in PKG postinstall scripts
+  - Removes Gatekeeper "verifying" prompt on first launch after PKG installation
+  - Note `gktool` is only available on macOS Sonoma and newer
+- Resolve unpatching crash edge case when host doesn't require patches.
+- Implement new Software Update Catalog Parser for macOS Installers
+- Implement new Copy on Write detection mechanism for all file copying operations
+  - Implemented using `getattrlist` and `VOL_CAP_INT_CLONE` flag
+  - Helps improve performance on APFS volumes
+- Increase model range for S1X/S3X patching to include Haswell Macs and `MacPro6,1`
+  - Helps avoid an issue where older machines with newer, unsupported SSDs would fail to boot
+  - Only affects building EFI from another machine
+- Resolve AMD Navi MXM GPU detection for modded iMac9,x-12,x
+  - Thanks @Ausdauersportler for the patch!
+- Implement early macOS Sequoia support:
+  - Supporting Macs with Metal and non-Metal-based graphics:
+    - MacBook5,x - 10,1
+    - MacBookAir2,x - 7,x
+    - MacBookPro4,1 - 14,x
+    - Macmini3,1 - 7,1
+    - iMac7,1 - 18,x
+    - MacPro3,1 - 6,1
+      - MacPro3,1 can only boot with 4 cores max currently
+      - 8 cores can be re-enabled for older OSes in the GUI:
+        - Settings -> Build -> MacPro3,1/Xserve2,1 Workaround
+    - Xserve2,1 - 3,1
+      - Xserve2,1 can only boot with 4 cores max currently
+      - 8 cores can be re-enabled for older OSes in the GUI:
+        - Settings -> Build -> MacPro3,1/Xserve2,1 Workaround
+  - Excludes the newly dropped MacBookAir8,x series.
+    - No estimate can be given when support will be added.
+  - For non-Metal graphics, Photos app will be broken.
+    - No estimate can be given when support will be added.
+- Implement new MetallibSupportPkg system to support macOS Sequoia on Metal 3802-based GPUs.
+  - See repository for more details: [MetallibSupportPkg](https://github.com/dortania/MetallibSupportPkg).
+- Implement new Patchset Detection architecture.
+- Implement new kernel cache building architecture.
+- Resolve "Label" error in com.dortania.opencore-legacy-patcher.os-caching.plist.
+- Add macOS Sequoia icons to boot picker and GUI.
+- Resolve Memoji crashes on 3802 GPUs.
+- Resolve Photos Memories tab crash on Intel Ivy Bridge/Haswell iGPUs.
+- Increment Binaries:
+  - PatcherSupportPkg 1.8.0 - release
+  - OpenCorePkg 1.0.1 - release
+  - Lilu 1.6.8 - release
+  - WhateverGreen 1.6.7 - release
+  - RestrictEvents 1.1.4 - release
+  - FeatureUnlock 1.1.6 - release
+  - DebugEnhancer 1.0.9 - release
+  - CPUFriend 1.2.8 - release
+  - AutoPkgInstaller 1.0.4 - release
+  - CryptexFixup 1.0.3 - release
+
+## 1.5.0
+- Restructure project directories
+  - Python:
+    - Move logic into `opencore_legacy_patcher` directory
+    - Use relative imports for local libraries
+  - Documentation:
+    - Move images to `docs/images`
+  - Payloads:
+    - Remove redundant/unused files bundled in payloads.dmg
+- Resolve unpatching Nvidia Web Drivers failing to clean up `/Library/Extensions`
+- Implement preflight code signature checks for macOS installer creation
+  - Ensures validity of `createinstallmedia` binary before execution
+- Modularize AutoPkg's pre/postinstall scripts
+  - Adjusted to use functions for better readability
+  - Implements ZSH shebang
+  - Removes OS logging
+- Disable usage of `OpenLegacyBoot.efi`
+  - Resolves boot issues on certain CSM-based Macs
+- Implement new PKG-based installer
+  - `OpenCore-Patcher.pkg` is now the recommended method for installation
+  - `OpenCore-Patcher-Uninstaller.pkg` is now available for uninstallation
+    - Note this only removes the application, not any patches applied
+  - `OpenCore-Patcher-GUI.app.zip` is deprecated and will be removed in future versions
+- Implement new Privileged Helper Tool
+  - Removes need for password prompts when installing patches, creating installers, etc.
+  - Installed at `/Library/PrivilegedHelperTools/com.dortania.opencore-legacy-patcher.privileged-helper`
+  - No launch services required
+  - For running from source, recompile tool with debug configuration (`make debug`)
+- Resolve OpenCore-Patcher.app window not appearing as topmost window on launch
+- Reworked CI tooling:
+  - New build script with reworked parameters: `Build-Project.command`
+  - Remove reliance on WhiteBox's Packages for AutoPkg creation
+    - Now implements `pkgbuild` and `productbuild` for package creation through `macOs-Pkg-Builder` Python module
+- Implement additional sanity checks before performing root patches
+  - Checks for mismatched snapshots vs root volume macOS versions
+- Increment Binaries:
+  - OpenCorePkg 1.0.0 - release
+
+## 1.4.3
+- Update non-Metal Binaries for macOS Sonoma:
+  - Resolve TeraScale 2 screen recording kernel panic
+  - Resolve Dock location after changing screen resolution
+  - Resolve 14.4 loginwindow crashes
+- Patch SkipLogo on Macs that natively support Monterey or newer
+  - Resolves missing Apple logo on boot screen
+- Increment Binaries:
+  - OpenCorePkg 0.9.9 - release
+
+## 1.4.2
+- Resolve Auto-Join support for Modern Wireless on macOS 14.4
+  - Applicable for BCM94360, 4360, 4350, 4331 and 43224 chipsets
+- Resolve WiFi support for Legacy Wireless on macOS 12.7.4 and 13.6.5
+  - Applicable for BCM94328, BCM94322 and Atheros chipsets
+- Resolve USB 1.1 on macOS Ventura regression from OCLP 1.4.0
+- Increment Binaries:
+  - PatcherSupportPkg 1.4.8 - release
+
+## 1.4.1
+- Update updater implementation
+- Resolve Keyboard/Trackpad support for MacBookAir6,x running macOS 14.4 and newer
+  - Expands SPI Keyboard and Trackpad patch to include MacBookAir6,x
+- Publish Bluetooth NVRAM variables for BCM2046 and BCM2070 chipsets
+  - Reduces need for NVRAM reset to restore Bluetooth support in newer OSes (Thanks @ausdauersportler)
+
+## 1.4.0
+- Refactor subprocess invocations
+- Resolve RecoveryOS support (Regression resolved in OpenCorePkg)
+- Restore SPI Keyboard and Trackpad support for macOS 14.4 and newer
+  - Applicable for MacBook8,1, MacBookAir7,x and MacBookPro12,1-14,x
+- Restore support for T1 on macOS 14.4 and newer
+  - Applicable for MacBookPro13,2, MacBookPro13,3, MacBookPro14,2, MacBookPro14,3
+- Restore support for legacy Metal GPUs on macOS 14.4 and newer
+  - Applicable for:
+    - Intel Ivy Bridge through Skylake
+    - Nvidia Kepler
+    - AMD legacy GCN
+- Restore support for USB 1.1 on macOS 14.4 and newer
+  - Applicable for Penryn Macs, Xserve3,1 and MacPro4,1/5,1
+- Resolve support for legacy and modern WiFi on macOS 14.4 and newer
+  - Applicable for all WiFi-equipped Macs
+  - Note with 14.4: Auto-Join may not work until you forget and rejoin the network
+- Increment binaries:
+  - OpenCorePkg 0.9.7 - release
+
+## 1.3.0
+- Resolve mismatched `CFBundleExecutable` and binary name for kexts.
+  - Resolves ProperTree binary detection (Thanks @CorpNewt).
+  - Applicable extensions:
+    - corecrypto_T1.kext
+    - corecaptureElCap.kext
+    - IO80211ElCap.kext
+- Resolve 3802-GPU support for macOS 14.2 Beta 2 and newer.
+  - Applicable GPUs:
+    - Intel Ivy Bridge and Haswell iGPUs
+    - Nvidia Kepler dGPUs
+- Increment Binaries:
+  - PatcherSupportPkg 1.4.6 - release
+
+## 1.2.1
+- Resolve `TeraScale 2 Acceleration` checkbox in Settings not being saved
+  - Thanks @rtd1250
+- Resolve Auto Patcher failing to launch after updating macOS
+  - Regression from 1.2.0
+
+## 1.2.0
+- Resolve application not existing if user dismisses an update instead of installing
+- Resolve lldb crashes on extracted binaries
+  - Remove MH_DYLIB_IN_CACHE flag from binaries extracted with DSCE
+- Add support for detecting T1 Security Chips in DFU mode
+- Resolve macOS 14.2 coreauthd crashes on T1 Macs
+- Resolve missing NFC firmware on T1 Macs
+- Update non-Metal Binaries for macOS Sonoma:
+  - Resolve Photos app crash
+  - Resolve loginwindow crashes
+  - Workaround tile window popup freezing apps by disabling the feature
+  - Workaround monochrome desktop widgets rendering issues by enforcing full color (can be disabled in OCLP settings)
+- Add new arguments:
+  - `--cache_os`: Cache necessary patcher files for OS to be installed (ex. KDKs)
+  - `--prepare_for_update`: Clean up patcher files for OS to be installed (ex. /Library/Extensions)
+- Add new Launch Daemons for handling macOS updates:
+  - `macos-update.plist`:
+    - Resolves KDKless Macs failing to boot after updating from 14.0 to 14.x
+    - Adds support for KDK caching for OS to be installed
+    - Invoked when update is staged
+    - `/Library/LaunchDaemons/com.dortania.opencore-legacy-patcher.macos-update.plist`
+  - `os-caching.plist`
+    - Resolves unsupported/old KDKs from being used post-update
+    - Invoked when update is downloading
+    - `/Library/LaunchDaemons/com.dortania.opencore-legacy-patcher.os-caching.plist`
+- Load UI icons from local path
+  - Resolves macOS downloader crash on slower machines
+- Resolve iMac18,2 internal 4K display support
+- Remove News Widget removal from Control Centre
+  - News Widget no longer crashes on 3802-based GPUs
+- Resolve i210 NIC support for macOS Sonoma
+- Increment Binaries:
+  - PatcherSupportPkg 1.4.5 - release
+  - OpenCorePkg 0.9.6 - release
+
+## 1.1.0
+- Resolve rendering issues on Intel Broadwell iGPUs
+- Update non-Metal Binaries for macOS Sonoma:
+  - Resolve unresponsive Weather app
+  - Resolve full screen menubar covering the app toolbar
+  - Resolve unfocused password windows
+- Resolve USB 1.1 kernel panics on macOS 14.1
+- Resolve PCIe FaceTime camera support on macOS 14.1
+- Resolve T1 Security Chip support on macOS 14
+  - Applicable for MacBookPro13,2, MacBookPro13,3, MacBookPro14,2, MacBookPro14,3
+- Add support for stand alone OpenCore Vaulting without Xcode Command Line Tools (Jazzzny)
+- Re-allow NVMeFix for macOS 14
+- Remove `-lilubetaall` argument for machines without AppleALC
+- Increment Binaries:
+  - PatcherSupportPkg 1.4.2 - release
+  - AirportBrcmFixup 2.1.8 - release
+  - BlueToolFixup 2.6.8 - release
+  - RestrictEvents 1.1.3 - release
+  - AMFIPass 1.4.0 - release
+
+## 1.0.1
+- Resolve rendering issues on Intel Ivy Bridge iGPUs
+- Update non-Metal Binaries for macOS Sonoma:
+  - Resolve unresponsive Catalyst buttons
+  - Resolve window unfocusing issues
+  - Resolve menu bar fonts not changing color automatically with Beta Menu Bar enabled
+  - Improve Lock Screen clock transparency
+- Prevent random WiFiAgent crashes
+- Add error handling for corrupted patcher settings
+- Remove CoreImage patch for 3802 GPUs on Ventura
+- Avoid listing PCIe FaceTime camera patch on pre-Sonoma OSes
+  - Only cosmetic in Root Patching UI, however it has been removed to avoid confusion
+
+## 1.0.0
+- Resolve BCM2046 and BCM2070 support on macOS 13.3 and newer
+- Workaround 13.3+ Kernel Panic on AMD GCN GPUs playing DRM content
+- Add new macOS Installer download menu (Jazzzny)
+- Refresh download UI (Jazzzny)
+- Add support for Universal 2 distribution (x86_64 and ARM64)
+  - Drops Rosetta requirement on Apple Silicon Macs
+  - Note building from source will require Python 3.11 or newer and up-to-date Python modules
+- Update font handling code, fixing font issues on Yosemite and El Capitan
+- Resolve incorrect RELEASE usage of OpenCore binaries when DEBUG enabled
+- Add RenderBox.framework patch for 3802-based Intel GPUs on macOS 13.3 and newer
+  - Works around Weather and Widget freezing
+  - Applicable for Intel Ivy Bridge and Haswell iGPUs
+- Add macOS Sonoma support to PatcherSupportPkg validation in CI
+- Implement basic support for macOS Sonoma:
+  - Supports same range of hardware as Ventura, in addition to:
+    - iMac18,x
+    - MacBook10,1
+    - MacBookPro14,x
+      - [T1 chip currently unsupported in Sonoma](https://github.com/dortania/OpenCore-Legacy-Patcher/issues/1103)
+  - Resolved issues:
+    - Graphics Acceleration support for 3802 and non-Metal GPUs
+    - UI corruption on 31001 GPUs
+    - Wireless Networking for BCM94360, 4360, 4350, 4331 and 43224
+    - USB ethernet support for adapters based on ECM protocol (ex. Realtek)
+    - dGPU support for MacBookPro14,3
+    - S1X/S3X NVMe Drive Support
+    - PCIe-based FaceTime Camera support
+    - Bluetooth support by switching to dynamic VMM spoofing
+- Increment Binaries:
+  - OpenCorePkg 0.9.3 - release
+  - Lilu 1.6.7 - release
+  - WhateverGreen 1.6.6 - release
+  - RestrictEvents 1.1.3 - (rolling - 4f233dd)
+  - FeatureUnlock 1.1.5 - release
+  - DebugEnhancer 1.0.8 - release
+  - CPUFriend 1.2.7 - release
+  - BlueToolFixup 2.6.8 - rolling (2305aaa)
+  - CryptexFixup 1.0.2 - release
+  - NVMeFix 1.1.1 - release
+  - PatcherSupportPkg 1.3.2 - release
+- Build Server Changes:
+  - Upgrade Python backend to 3.11.5
+  - Upgrade Python modules:
+    - requests - 2.31.0
+    - pyobjc - 9.2
+    - wxpython - 4.2.1
+    - pyinstaller - 5.13.2
+    - packaging - 23.1
+
+## 0.6.8
+- Update non-Metal Binaries:
+  - Improve experimental Menubar implementation stability
+  - Implement reduce transparency Menubar
+  - Resolve Color Profile support and Black Box rendering issues on HD 3000 Macs
+    - Drops ColorSync downgrade configuration option
+    - Resolves macOS 13.5 booting on HD 3000 Macs
+- Resolve app not updating in `/Applications` after an update
+  - Work-around users manually copying app to `/Applications` instead of allowing Root Volume Patcher to create a proper alias
+- Add configuration for mediaanalysisd usage
+  - For systems that are the primary iCloud Photo Library host, mediaanalysisd may be unstable on large amounts of unprocessed faces
+  - Applicable to 3802-based GPUs (ie. Intel Ivy Bridge and Haswell iGPUs, Nvidia Kepler dGPUs)
+- Remove MacBook4,1 references
+  - Machine was never properly supported by OCLP
+- Restore support for Aquantia Aqtion 10GBe Ethernet for Pre-VT-d systems on 12.3 and newer
+  - i.e. MacPro5,1 with AQC107 expansion card running macOS Ventura/Monterey 12.6.x
+  - Thanks [@jazzzny](https://github.com/jazzzny)
+- Resolve AMD Vega support on pre-AVX2 Macs in macOS Ventura
+  - Originally caused by regression from 0.6.2
+- Disable non-Metal's Menubar 2 configuration
+  - Can be manually re-enabled, however application will try to disable to prevent issues
+- Remove AppleGVA downgrade on Intel Skylake iGPUs
+- Implement AMFIPass system
+  - Removes need for disabling Library Validation and AMFI outright on all applicable systems
+- Backend Changes:
+  - device_probe.py:
+    - Add USB device parsing via `IOUSBDevice` class
+    - Streamline Bluetooth device detection
+    - Add Probing for Top Case hardware (Jazzzny)
+      - Improves handling for altered hardware scenarios (i.e. MacBookPro4,1 with MacBookPro3,1 topcase)
+  - utilities.py:
+    - Fix indexing error on Device Paths (thx [@Ausdauersportler](https://github.com/Ausdauersportler))
+- Increment Binaries:
+- PatcherSupportPkg 1.2.2 - release
+
+## 0.6.7
+- Resolve partition buttons overlapping in Install OpenCore UI
+  - ex. "EFI" and additional FAT32 partitions on a single drive
+- Re-enable mediaanalysisd on Ventura
+  - Allows for Live Text support on systems with 3802 GPUs
+    - ie. Intel Ivy Bridge and Haswell, Nvidia Kepler
+  - Previously disabled due to high instability in Photos with Face Scanning, now resolved
+- Work-around crashing after patching with MenuBar2 implementation enabled
+  - Setting must be re-enabled after patching
+- Update non-Metal Binaries:
+  - Resolve window placement defaulting past top of screen for some apps
+    - ex. OpenCore-Patcher.app during root patching
+  - Resolve indeterminate progress bars not rendering with wxWidgets in Monterey and later
+    - ex. OpenCore-Patcher.app
+- UI changes:
+  - Add "Show Log File" button to menubar
+- Avoid listing unsupported installer to download by default
+  - ex. macOS 14 InstallAssistant.pkg
+- Resolve crash when fetching remote macOS installers offline
+- Avoid displaying root patches on unsupported macOS versions
+  - ex. macOS 14
+- Backend changes:
+  - Call `setpgrp()` to prevent app from being killed if parent process is killed (ie. LaunchAgents)
+  - Rework logging handler:
+    - Implement formatted logging
+      - Allowing easier debugging
+    - Implement per-version, per-run file logging
+      - ex. OpenCore-Patcher (0.6.7) (2021-12-31-12-34-56-666903).log
+    - Keep only 10 latest log files
+    - Reveal log file in Finder on main thread crash
+    - Avoid writing username to log file
+  - Resolve SharedSupport.dmg pathing error during macOS Installer Verification
+    - Applicable to systems with 2 (or more) USB Installers with the same name plugged in
+  - Resolve payloads path being mis-routed during CLI calls
+  - Add UI when fetching root patches for host
+  - Remove progress bar work-around for non-Metal in Monterey and later
+    - Requires host to have been patched with PatcherSupportPkg 1.1.2 or newer
+- Increment Binaries:
+  - PatcherSupportPkg 1.1.2 - release
+
+## 0.6.6
+- Implement option to disable ColorSync downgrade on HD 3000 Macs
+  - Allows for Display Profiles support on some units
+    - Note: black box rendering issues will likely appear
+  - Thanks [@jazzzny](https://github.com/Jazzzny)
+- Rename payloads.dmg volume name to "OpenCore Patcher Resources (Base)"
+  - Allows for better identification when mounted (ex. Disk Utility while app is running)
+- Implement DMG-based PatcherSupportPkg system
+  - Reduces both app size and root patching time
+- Resolve incorrect remote KDK matching for macOS betas
+  - ex. Beta 4 KDK being recommended for Beta 3 install
+- Resolve low power mode on MacPro6,1
+  - Credit to CaseyJ's [PCI Bus Enumeration Patch](https://github.com/AMD-OSX/AMD_Vanilla/pull/196)
+- Resolve PCI eject menu appearing on unsupported hardware
+- Resolve kernel panic on wake for AMD TeraScale 1 and Nvidia Tesla 8000 series GPUs
+- Resolve loss of Ethernet after wake on MacPro3,1 in Ventura
+- Resolve graphics corruption on wake for TeraScale 1
+  - Patch currently limited to Ventura and newer
+- Restore Function Keys on MacBook5,2 and MacBook4,1
+  - Implementation by [@jazzzny](https://github.com/Jazzzny)
+- Update non-Metal Binaries:
+  - Resolves cryptexd and sshd crashes
+  - Resolves screen recording regression
+  - Resolves Photo Booth on macOS Monterey and later
+    - May require tccplus for permissions
+- Resolve Application alias not being created with AutoPatcher
+- Backend changes:
+  - Rename OCLP-Helper to OpenCore-Patcher
+    - Allows for better identification when displaying prompts
+  - Reimplement wxPython GUI into modularized system:
+    - Allows for easier maintenance and future expansion
+    - Changes include:
+      - Reworked settings UI
+      - Unified download UI with time remaining
+      - Implement in-app update system
+        - Guides users to update OpenCore and Root Patches once update's installed
+      - Expand app update checks to include nightly users
+        - ex. 0.6.6 nightly -> 0.6.6 release
+      - Implement macOS installer verification after flashing
+      - Implement proper UI call backs on long processes
+        - ex. Root patching
+      - Implement default selections for disks and installers
+      - Set about and quit items
+  - Utilize `py-applescript` for authorization prompts
+    - Avoids displaying prompts with `osascript` in the title
+    - Due to limitations, only used for installer creation and OpenCore installation
+  - Resolve exception handler not logging to file
+  - Display raised exceptions from main thread to users
+- Increment Binaries:
+  - PatcherSupportPkg 1.1.0 - release
+  - OpenCorePkg 0.9.2 - release
+  - Lilu 1.6.6 - rolling (d8f3782)
+  - RestrictEvents 1.1.1 - release
+  - FeatureUnlock 1.1.4 - release
+  - BlueToolFixup 2.6.6 - release
+
+## 0.6.5
+- Update 3802 Patchset Binaries:
+  - Resolves additional 3rd party app crashes on Metal with macOS 13.3+
+  - ex: PowerPoint's "Presentation Mode"
+- Update non-Metal Binaries:
+  - Resolves Safari 16.4 frozen canvas rendering
+  - ex: Google Docs
+- Allow for coexistence of USB 3.0 controllers and USB 1.1 patches on macOS 13+
+  - Restores USB 3.0 expansion card support on USB 1.1 machines such as MacPro5,1
+- Resolve OpenCL rendering on Nvidia Web Drivers
+  - thanks [@jazzzny](https://github.com/Jazzzny)
+- Resolve UI unable to download macOS installers on unknown models
+  - ex. M2 Macs and Hackintoshes
+- Implement minimum OS check for installer creation
+  - Prevents vague errors when creating Ventura installers on Yosemite
+- Resolve WindowServer crashing with Rapid Security Response (RSR) installation
+  - Primarily applicable for Haswell iGPUs on 13.3.1 (a)
+- Update legacy Wireless binaries
+  - Resolve wifi crashing on 13.4 with BCM94322, BCM943224 and Atheros chipsets
+- Backend changes:
+  - macos_installer_handler.py:
+    - Expand OS support for IA parsing in SUCatalog
+  - gui_main.py:
+    - Fix spacing regression introduced with `.AppleSystemUIFont` implementation
+- Increment Binaries:
+  - PatcherSupportPkg 0.9.7 - release
+- Build Server Changes:
+  - Upgrade CI Host to macOS Monterey
+  - Upgrade Xcode to 14.2
+  - Switch from `altool` to `notarytool` for notarization
+
+## 0.6.4
+- Backend changes:
+  - Implement new analytics_handler.py module
+    - Adds support for anonymous analytics including host info (and crash reports in the future)
+    - Can be disabled via GUI or `defaults write com.dortania.opencore-legacy-patcher DisableCrashAndAnalyticsReporting -bool true`
+- Resolve Safari rendering error on Ivy Bridge in macOS 13.3+
+- Increment Binaries:
+  - RestrictEvents 1.1.1 - rolling (495f4d5)
+
+## 0.6.3
+- Update non-Metal Binaries:
+  - Resolves Safari 16.4 rendering issue
+  - Resolves left side menubar selections
+  - Implements automatic menubar text color
+  - New experimental Menubar implementation can be enabled via `defaults write -g Amy.MenuBar2Beta -bool true`
+    - Note: If you experience issues with the new implementation, you can revert back to the old implementation by running `defaults delete -g Amy.MenuBar2Beta`
+- Implement full IOUSBHostFamily downgrade for UHCI/OHCI
+  - Resolves panics on certain iMac models
+- Resolve unused KDKs not being properly cleaned up
+- Implement MXM graphics handling for iMac9,1
+  - Credit to [@Ausdauersportler](https://github.com/Ausdauersportler) for implementation
+- Resolve CoreGraphics.framework crashing on Ivy Bridge CPUs in macOS 13.3+
+  - Disables f16c sysctl reporting
+- Resolve accidental CPU renaming with RestrictEvents
+- Resolve backlight and internal display support for AMD Navi MXM GPUs
+  - Credit to [@Ausdauersportler](https://github.com/Ausdauersportler) for bug fix
+- Resolve 3rd Party Apps erroring on Metal with macOS 13.3
+  - Applicable Software: Applications directly using Metal (ex. Blender, Parallels Desktop)
+  - Applicable Hardware: 3802-based GPUs (ie. Intel Ivy Bridge and Haswell iGPUs, Nvidia Kepler dGPUs)
+- Backend changes:
+  - Use `.AppleSystemUIFont` for wxPython text rendering (thanks [@jazzzny](https://github.com/Jazzzny))
+  - Add extra error handling for network errors:
+    - Handles `RemoteDisconnected('Remote end closed connection without response')` exceptions
+  - Move root volume patch set generation to dedicated sys_patch_generate.py module
+  - Refactored integrity_verification.py:
+    - Implemented Object-Oriented design
+    - Reduced disk I/O and main thread monopolization
+- Increment Binaries:
+  - PatcherSupportPkg 0.9.3 - release
+  - OpenCorePkg 0.9.1 - release
+  - AirPortBrcmFixup 2.1.7 - release
+  - RestrictEvents 1.1.0 - release
+  - BrcmPatchRAM 2.6.5 - release
+
 ## 0.6.2
 - Work around Black Box rendering issues on certain Display Color Profiles
   - Limited to Ventura currently due to limitations with other color profiles
@@ -7,10 +563,68 @@
 - Ensure `Moraea_BlurBeta` is set on non-Metal systems
 - Implement proper Root Unpatching verification in GUI
   - Removes arbitrary patch requirements used against unpatching (ex. network connection)
-- Prioritize KdkSupportPkg repository for downloads
-  - Skips calls to Apple's now defunct Developer Portal API
+- Implement Kernel Debug Kit installation during OS installs
+  - Avoids network requirement for first time installs
+  - Paired along side AutoPkgInstaller
+- Implement Kernel Debug Kit backup system
+  - Allows for easy restoration of KDKs if OS updates corrupted installed KDKs
+- Update Wireless binaries
+  - Fixed WiFi preferences crash with legacy wifi patches
+- Update non-Metal Binaries
+  - Improved menubar blur saturation
+  - Fixed System Settings hover effects, including Bluetooth connect button
+  - Add Books hacks (reimplement cover image generation, disable broken page curl animation)
+  - Fixed unresponsive buttons
+- Implement Hardware Encoding support for AMD GCN 1-3, Polaris and Vega GPUs
+  - Applicable for pre-Haswell Macs on macOS Ventura
+  - Resolves DRM playback issues on Netflix, Disney+, etc.
+    - Note: GCN 1-3 DRM is functional, however hardware video encoding is still experimental
+      - AppleTV+ may be unstable due to this
+- Implement support for AMD Navi and Lexa MXM GPUs in 2009-2011 iMacs
+  - Primarily applicable for MXM 3.0 variants of AMD WX3200 (0x6981) and AMD RX5500XT (0x7340)
+  - Credit to [Ausdauersportler](https://github.com/Ausdauersportler) for implementation
+- Implement Continuity Camera Unlocking for pre-Kaby Lake CPUs
+  - Applicable for all legacy Macs in macOS Ventura
+- Resolve boot support for 3802-based GPUs with macOS 13.3
+  - Applicable for following GPUs:
+    - Intel Ivy Bridge and Haswell iGPUs
+    - Nvidia Kepler dGPUs
+  - Note: patchset now requires AMFI to be disabled, patchset still in active development to remove this requirement
+- Backend Changes:
+  - Refactored kdk_handler.py
+    - Prioritizes KdkSupportPkg repository for downloads
+      - Skips calls to Apple's now defunct Developer Portal API
+    - Support local loose matching when no network connection is available
+    - Implement pkg receipt verification to validate integrity of KDKs
+  - Implemented logging framework usage for more reliable logging
+    - Logs are stored under `~/Library/Logs/OpenCore-Patcher.log`
+    - Subsequent runs are appended to the log, allowing for easy debugging
+  - Implemented new network_handler.py module
+    - Allows for more reliable network calls and downloads
+    - Better supports network timeouts and disconnects
+    - Dramatically less noise in console during downloads
+  - Implemented new macOS Installer handler
+  - Removed unused modules:
+    - sys_patch_downloader.py
+    - run.py
+    - TUI modules
+- Build Server Changes:
+  - Upgrade Python backend to 3.10.9
+  - Upgrade Python modules:
+    - requests - 2.28.2
+    - pyobjc - 9.0.1
+    - wxpython - 4.2.0
+    - pyinstaller - 5.7.0
+    - packaging - 23.0
 - Increment Binaries:
-  - PatcherSupportPkg 0.8.3 - release
+  - PatcherSupportPkg 0.8.7 - release
+  - AutoPkgInstaller 1.0.2 - release
+  - FeatureUnlock 1.1.4 - rolling (0e8d87f)
+  - Lilu 1.6.4 - release
+  - WhateverGreen 1.6.4 - release
+  - NVMeFix 1.1.0 - release
+  - Innie 1.3.1 - release
+  - OpenCorePkg 0.9.0 - release
 
 ## 0.6.1
 - Avoid usage of KDKlessWorkaround on hardware not requiring it

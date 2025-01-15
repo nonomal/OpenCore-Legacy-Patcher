@@ -4,3 +4,7 @@ wxpython
 pyinstaller
 packaging
 py_sip_xnu
+py-applescript
+markdown2
+macos-pkg-builder
+mac-signing-buddy

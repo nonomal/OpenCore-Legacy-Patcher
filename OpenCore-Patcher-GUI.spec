@@ -1,15 +1,35 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-import sys, os, time, subprocess
+import os
+import sys
+import time
+import subprocess
+
+from pathlib import Path
+
+from PyInstaller.building.api import PYZ, EXE, COLLECT
+from PyInstaller.building.osx import BUNDLE
+from PyInstaller.building.build_main import Analysis
+
 sys.path.append(os.path.abspath(os.getcwd()))
-from resources import constants
+
+from opencore_legacy_patcher import constants
+
 block_cipher = None
+
+datas = [
+   ('payloads.dmg', '.'),
+   ('Universal-Binaries.dmg', '.'),
+]
+
+if Path("DortaniaInternalResources.dmg").exists():
+   datas.append(('DortaniaInternalResources.dmg', '.'))
 
 
 a = Analysis(['OpenCore-Patcher-GUI.command'],
              pathex=[],
              binaries=[],
-             datas=[('payloads.dmg', '.')],
+             datas=datas,
              hiddenimports=[],
              hookspath=[],
              hooksconfig={},
@@ -19,8 +39,10 @@ a = Analysis(['OpenCore-Patcher-GUI.command'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
-pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
+
+pyz = PYZ(a.pure,
+          a.zipped_data,
+          cipher=block_cipher)
 
 exe = EXE(pyz,
           a.scripts,
@@ -33,9 +55,10 @@ exe = EXE(pyz,
           upx=True,
           console=False,
           disable_windowed_traceback=False,
-          target_arch=None,
+          target_arch="universal2",
           codesign_identity=None,
-          entitlements_file=None )
+          entitlements_file=None)
+
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
@@ -44,17 +67,20 @@ coll = COLLECT(exe,
                upx=True,
                upx_exclude=[],
                name='OpenCore-Patcher')
+
 app = BUNDLE(coll,
              name='OpenCore-Patcher.app',
-             icon="payloads/OC-Patcher.icns",
+             icon="payloads/Icon/AppIcons/OC-Patcher.icns",
              bundle_identifier="com.dortania.opencore-legacy-patcher",
              info_plist={
+                "CFBundleName": "OpenCore Legacy Patcher",
+                "CFBundleVersion": constants.Constants().patcher_version,
                 "CFBundleShortVersionString": constants.Constants().patcher_version,
                 "NSHumanReadableCopyright": constants.Constants().copyright_date,
                 "LSMinimumSystemVersion": "10.10.0",
                 "NSRequiresAquaSystemAppearance": False,
                 "NSHighResolutionCapable": True,
                 "Build Date": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-                "BuildMachineOSBuild": subprocess.run("sw_vers -buildVersion".split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout.decode().strip(),
+                "BuildMachineOSBuild": subprocess.run(["/usr/bin/sw_vers", "-buildVersion"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout.decode().strip(),
                 "NSPrincipalClass": "NSApplication",
              })

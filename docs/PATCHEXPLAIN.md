@@ -1,6 +1,6 @@
 # Explaining the patches in OpenCore Legacy Patcher
 
-In our patcher, there are numerous patches used to ensure a stable system. Here we're going to go over what patches are used and why we recommend or even require them.
+In our patcher, there are numerous patches used to ensure a stable system. Here, we're going to go over what patches are used and why we recommend or even require them.
 
 * [OpenCore Settings](#opencore-settings)
 * [Injected Kexts](#injected-kexts)
@@ -8,7 +8,7 @@ In our patcher, there are numerous patches used to ensure a stable system. Here 
 
 ## OpenCore Settings
 
-Below is a run down of the main logic OpenCore Legacy Patcher uses to gain native support in macOS. Note that OpenCore's configuration is documented within [OpenCorePkg](https://github.com/acidanthera/OpenCorePkg) as well as on an online version provided by us:
+Below is a rundown of the main logic that OpenCore Legacy Patcher uses to gain native support in macOS. Note that OpenCore's configuration is documented within [OpenCorePkg](https://github.com/acidanthera/OpenCorePkg) as well as on an online version provided by us:
 
 * [OpenCorePkg Online Docs](https://dortania.github.io/docs/latest/Configuration.html)
 
@@ -139,13 +139,17 @@ Below is a run down of the main logic OpenCore Legacy Patcher uses to gain nativ
   * Reason: Enables Content Caching when using VMM spoofing
   * Logic: Adds args to NVRAM
   * Models: Any model using VMM spoofing
+* `amfi=0x80`
+  * Reason: Disables Apple Mobile File Integrity to allow for root patches
+  * Logic: Adds args to NVRAM
+  * Models: Any model that requires unsigned root patches
 
 ### UEFI -> ProtocolOverrides
 
 * GopPassThrough
   * Reason: Used for proper output on machines with UGA firmware but GOP GPU
   * Logic: Provide GOP protocol instances on top of UGA protocol instances
-  * Models: MacPro3,1, MacBook4,1 iMac7,1-8,1
+  * Models: MacPro3,1, iMac7,1-8,1
 
 :::
 
@@ -184,6 +188,16 @@ Below is an explanation of what Kexts OpenCore Legacy Patcher will inject into m
 * RestrictEvents
   * Reason: Disables memory errors on MacPro7,1
   * Models: Mac Pros and Xserves
+* CryptexFixup
+  * Reason: Installs non AVX2.0 Cryptex on non AVX2.0 CPUs
+  * Models: All CPUs Ivy Bridge and older
+* AutoPkgInstaller
+  * Reason: Allows for automatic root patching
+* NVMeFix
+  * Reason: Fixes 3rd party NVMe support
+* RSRHelper
+  * Reason: Fixes Rapid Security Response Support on root patched installs
+* 
 
 ### Ethernet
 
@@ -197,6 +211,23 @@ Below is an explanation of what Kexts OpenCore Legacy Patcher will inject into m
   * Reason: Inject old Broadcom Ethernet kext to resolve networking in Big Sur
   * Logic: Patch out conflicting symbols to not collide existing BCM5701Ethernet
   * Models: 2011 and older Broadcom Ethernet require
+* Intel82574L
+  * Reason: Resolves Ethernet Support on MacPros 
+  * Models: MacPro3,1 - 5,1
+* CatalinaIntelI210Ethernet
+  * Reason: Fixes Intel i210/i225 NIC support on pre-Ivy Macs
+* AppleIntel8254XEthernet
+  * Reason: Resolves Ethernet Support on MacPros 
+  * Models: MacPro3,1 - 5,1
+
+### Firewire 
+
+* IOFireWireFamily
+  * Reason: Allows for FireWire Boot Support
+* IOFireWireSBP2
+  * Reason: Allows for FireWire Boot Support
+* IOFireWireSerialBusProtoColTransport
+  * Reason: Allows for FireWire Boot Support
 
 ### Maps
 
@@ -215,14 +246,12 @@ Below is an explanation of what Kexts OpenCore Legacy Patcher will inject into m
 
 ### Wifi
 
-* IO80211HighSierra
-  * Reason: Re-inject Atheros wifi drivers from High Sierra
-  * Logic: Patch out conflicting symbols to not collide existing IO80211Family
-  * Models: Atheros cards
-* IO80211Mojave
-  * Reason: Re-inject Broadcom wifi drivers from Mojave
-  * Logic: Patch out conflicting symbols to not collide existing IO80211Family
-  * Models: BCM94322
+* IO80211ElCap
+  * Reason: Re-inject WiFi drivers from El Capitan 
+  * Models: BCM94328, BCM94322 and Atheros chipsets
+* corecaptureElCap.kext
+  * Reason: Re-inject WiFi drivers from El Capitan 
+  * Models: BCM94328, BCM94322 and Atheros chipsets
 
 ### Misc
 
@@ -238,6 +267,41 @@ Below is an explanation of what Kexts OpenCore Legacy Patcher will inject into m
 * SMC-Spoof
   * Reason: Spoofs SMC version to 9.9999
   * Models: All models require when spoofing minimal or higher
+* AppleRAIDCard
+  * Adds AppleRaidCard Support for Xserves
+* AMDGPUWakeHandler
+  * Reason: Adds Software Based Demux for 2011 15/17 Macbook Pros
+* AppleIntelCPUPowerManagement and AppleIntelCPUPowerManagementClient
+  * Reason: Restores Ivy Bridge and older CPU Power Management
+* AppleUSBTopCase
+  * Reason: Restore USB Keyboard support on Mac OS Ventura
+* AppleUSBMultitouch and AppleUSBTrackpad
+  * Reason: Restore USB Trackpad support on Mac OS Ventura
+* ASPP-Override
+  * Reason: Forces ACPI_SMC_PlatformPlugin to outmatch X86PlatformPlugin and disable firmware throttling 
+* BacklightInjector
+  * Reason: Fixes Brightness in iMacs with upgraded GPUs
+* BigSurSDXC
+  * Reason: Restores SDXC Support in Pre Ivy-Bridge Macs
+* Bluetooth-spoof
+  * Reason: Spoofs legacy Bluetooth to work on Monterey and newer
+* Innie
+  * Reason: Makes all PCIe drives appear internal
+  * Models: MacPro3,1 and newer & Xserve3,1 and newer 
+* KDKlessWorkaround
+  * Reason: Helps with Mac os updates on KDKless patched systems
+* LegacyUSBVieoSupport
+  * Reason: Fixes Legacy USB iSight support
+* MonteAHCIPort
+  * Reason: Fixes SSD support for stock SSD found in MacBookAir6,x
+* NoAVXFSCompressionTypeZlib
+  * Reason: Prevents AVXFSCompressionTypeZlib crash on pre AVX1.0 systems in 12.4+
+* SimpleMSR 
+  * Reason: Disables BD PROCHOT to prevent firmware throttling on Nehalem+ MacBooks
+* LegacyKeyboardInjector
+  * Reason: Fixes function keys on MacBook5,2
+
+
 :::
 
 ## On-Disk Patches
@@ -286,6 +350,15 @@ Applicable for BCM94328, BCM94322 and Atheros Wifi cards
 
 * OpenCL (libCLVMNVPTXPlugin.dylib, NVPTX.dylib)
   * Reason: Re-add Kepler hardware acceleration support
+* Metal 
+  * Reason: 3802 based GPU's broken by 13.3, requiring a Metal downgrade to 13.2.1
+
+### PrivateFrameworks
+
+* MTLCompiler
+  * Reason: 3802 based GPU's broken by 13.3, requiring a MTLCompiler downgrade to 13.2.1
+* GPUCompiler
+  * Reason: 3802 based GPU's broken by 13.3, requiring a GPUCompiler downgrade to 13.2.1
 
 :::
 
@@ -306,6 +379,10 @@ Applicable for BCM94328, BCM94322 and Atheros Wifi cards
 
 * AppleGVA/AppleGVACore
   * Reason: Enable DRM support
+* MTLCompiler
+  * Reason: 3802 based GPU's broken by 13.3, requiring a MTLCompiler downgrade to 13.2.1
+* GPUCompiler
+  * Reason: 3802 based GPU's broken by 13.3, requiring a GPUCompiler downgrade to 13.2.1
 
 ### Frameworks
 
@@ -313,11 +390,116 @@ Applicable for BCM94328, BCM94322 and Atheros Wifi cards
   * Reason: Re-add Ivy Bridge hardware acceleration support
 * WebKit (com.apple.WebProcess.sb)
   * Reason: Re-add Ivy Bridge Safari rendering support
+* Metal 
+  * Reason:  3802 based GPU's broken by 13.3, requiring a Metal downgrade to 13.2.1
 :::
 
-::: details non-Metal Graphics Acceleration Patches (11.0+)
+::: details Intel Haswell Graphics Acceleration Patches (13.0+)
+
+### Extensions 
+
+* AppleIntelFramebufferAzul.kext
+* AppleIntelHD5000Graphics.kext
+* AppleIntelHD5000GraphicsGLDriver.bundle
+* AppleIntelHD5000GraphicsMTLDriver.bundle
+* AppleIntelHD5000GraphicsVADriver.bundle 
+* AppleIntelHSWVA.bundle
+* AppleIntelGraphicsShared.bundle
+
+### Frameworks 
+
+* Metal 
+  * Reason:  3802 based GPU's broken by 13.3, requiring a Metal downgrade to 13.2.1
+
+### PrivateFrameworks
+
+* MTLCompiler
+  * Reason: 3802 based GPU's broken by 13.3, requiring a MTLCompiler downgrade to 13.2.1
+* GPUCompiler
+  * Reason: 3802 based GPU's broken by 13.3, requiring a GPUCompiler downgrade to 13.2.1
+
+:::
+
+::: details Intel Broadwell Graphics Acceleration Patches (13.0+)
+
+### Extensions 
+
+* AppleIntelBDWGraphics.kext
+* AppleIntelBDWGraphicsFramebuffer.kext
+* AppleIntelBDWGraphicsGLDriver.bundle
+* AppleIntelBDWGraphicsMTLDriver.bundle
+* AppleIntelBDWGraphicsVADriver.bundle
+* AppleIntelBDWGraphicsVAME.bundle
+* AppleIntelGraphicsShared.bundle
+
+
+
+:::
+
+::: details Intel Skylake Graphics Acceleration Patches (13.0+)
+
+### Extensions 
+
+* AppleIntelSKLGraphics.kext
+* AppleIntelSKLGraphicsFramebuffer.kext
+* AppleIntelSKLGraphicsGLDriver.bundle
+* AppleIntelSKLGraphicsMTLDriver.bundle
+* AppleIntelSKLGraphicsVADriver.bundle
+* AppleIntelSKLGraphicsVAME.bundle
+* AppleIntelGraphicsShared.bundle
+
+
+:::
+
+::: details AMD Legacy Vega Graphics Acceleration Patches (13.0+)
 
 ### Extensions
+
+* AMDRadeonX5000.kext
+* AMDRadeonVADriver2.bundle
+* AMDRadeonX5000GLDriver.bundle
+* AMDRadeonX5000MTLDriver.bundle
+* AMDRadeonX5000Shared.bundle
+* AMDShared.bundle
+
+:::
+
+::: details AMD Legacy Polaris Graphics Acceleration Patches (13.0+)
+
+### Extensions
+
+* AMDRadeonX4000.kext
+* AMDRadeonX4000HWServices.kext
+* AMDRadeonVADriver2.bundle
+* AMDRadeonX4000GLDriver.bundle
+* AMDMTLBronzeDriver.bundle
+* AMDShared.bundle
+
+:::
+
+::: details AMD Legacy GCN Graphics Acceleration Patches
+
+### Extensions
+
+* AMD7000Controller.kext
+* AMD8000Controller.kext
+* AMD9000Controller.kext
+* AMD9500Controller.kext
+* AMD10000Controller.kext
+* AMDRadeonX4000.kext
+* AMDRadeonX4000HWServices.kext
+* AMDFramebuffer.kext
+* AMDSupport.kext
+* AMDRadeonVADriver.bundle
+* AMDRadeonVADriver2.bundle
+* AMDRadeonX4000GLDriver.bundle
+* AMDMTLBronzeDriver.bundle
+* AMDShared.bundle
+
+
+
+
+::: details non-Metal Graphics Acceleration Patches (11.0+)
 
 #### General Patches
 
@@ -342,6 +524,19 @@ Applicable for BCM94328, BCM94322 and Atheros Wifi cards
   * NVDAResmanTesla.kext
     * 0x1ea59a - 0x1ea5b3: nop
     * Replace VSLGestalt to IOLockLock or any other known symbol of the same length.
+
+* NVIDIA Web Drivers Binaries 
+  * GeForceWeb.kext
+  * NVDAGF100HalWeb.kext
+  * NVDAGK100HalWeb.kext
+  * NVDAGM100HalWeb.kext
+  * NVDAGP100HalWeb.kext
+  * NVDAResmanWeb.kext
+  * NVDAStartupWeb.kext
+  * GeForceTeslaWeb.kext
+  * NVDANV50HalTeslaWeb.kext
+  * NVDAResmanTeslaWeb.kext
+    * Reason: Allows for non-Metal Acceleration for NVIDIA Maxwell and Pascal GPUs
 
 * AMD/ATI Binaries
   * AMD2400Controller.kext
